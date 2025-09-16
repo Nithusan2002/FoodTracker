@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var vm = FoodViewModel()
+    @State private var showingAddFood = false
+    
     let foods = [
             FoodItem(name: "Eple", calories: 52),
             FoodItem(name: "Banan", calories: 89),
@@ -15,8 +18,8 @@ struct ContentView: View {
         ]
         
         var body: some View {
-            NavigationView {
-                List(foods) { food in
+            NavigationStack {
+                List(vm.foods) { food in
                     HStack {
                         Text(food.name)
                         Spacer()
@@ -25,6 +28,20 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle("Dagens mat")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingAddFood = true
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingAddFood) {
+                    AddFoodView { name, calories in
+                        vm.addFood(name: name, calories: calories)
+                    }
+                }
             }
         }
 }
