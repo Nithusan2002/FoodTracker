@@ -8,15 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+    let foods = [
+            FoodItem(name: "Eple", calories: 52),
+            FoodItem(name: "Banan", calories: 89),
+            FoodItem(name: "Kyllingfilet", calories: 165)
+        ]
+        
+        var body: some View {
+            NavigationView {
+                List(foods) { food in
+                    HStack {
+                        Text(food.name)
+                        Spacer()
+                        Text("\(food.calories) kcal")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .navigationTitle("Dagens mat")
+            }
         }
-        .padding()
-    }
 }
 
 #Preview {
