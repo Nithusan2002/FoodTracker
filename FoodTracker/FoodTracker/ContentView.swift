@@ -8,43 +8,40 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var vm = FoodViewModel()
+    @StateObject private var viewModel = FoodViewModel()
     @State private var showingAddFood = false
-    
-    let foods = [
-            FoodItem(name: "Eple", calories: 52),
-            FoodItem(name: "Banan", calories: 89),
-            FoodItem(name: "Kyllingfilet", calories: 165)
-        ]
-        
-        var body: some View {
-            NavigationStack {
-                List(vm.foods) { food in
+
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(viewModel.foods) { item in
                     HStack {
-                        Text(food.name)
+                        Text(item.name ?? "")
                         Spacer()
-                        Text("\(food.calories) kcal")
+                        Text("\(item.calories) kcal")
                             .foregroundColor(.secondary)
                     }
                 }
-                .navigationTitle("Dagens mat")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingAddFood = true
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                        }
-                    }
+                .onDelete { indexSet in
+                    indexSet.map { viewModel.foods[$0] }.forEach(viewModel.deleteFood)
                 }
-                .sheet(isPresented: $showingAddFood) {
-                    AddFoodView { name, calories in
-                        vm.addFood(name: name, calories: calories)
+            }
+            .navigationTitle("Food Tracker")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingAddFood = true }) {
+                        Image(systemName: "plus")
                     }
                 }
             }
+            .sheet(isPresented: $showingAddFood) {
+                AddFoodView(viewModel: viewModel)
+            }
         }
+    }
 }
+
+
 
 #Preview {
     ContentView()
