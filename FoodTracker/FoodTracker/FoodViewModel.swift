@@ -15,12 +15,14 @@ class FoodViewModel: ObservableObject {
     
     init() {
         fetchFoods()
+        backfillCreatedAtIfNeeded()
     }
     
     func fetchFoods() {
         let request: NSFetchRequest<FoodItem> = FoodItem.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \FoodItem.name, ascending: true)]
-        
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \FoodItem.createdAt, ascending: false)
+        ]
         do {
             foods = try viewContext.fetch(request)
         } catch {
@@ -33,6 +35,7 @@ class FoodViewModel: ObservableObject {
         newFood.id = UUID()
         newFood.name = name
         newFood.calories = Int32(calories)
+        newFood.createdAt = Date() // NY LINJE
         
         saveContext()
         fetchFoods()
@@ -51,7 +54,20 @@ class FoodViewModel: ObservableObject {
             print("Error saving context: \(error)")
         }
     }
+    
+    func backfillCreatedAtIfNeeded() {
+        var changed = false
+        for item in foods where item.createdAt == nil {
+            item.createdAt = Date()
+            changed = true
+        }
+        if changed { saveContext() }
+    }
 }
 
+#Preview {
+    ContentView()
+        .environmentObject(FoodViewModel())
+}
 
 

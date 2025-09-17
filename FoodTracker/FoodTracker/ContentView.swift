@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = FoodViewModel()
+    @EnvironmentObject var viewModel: FoodViewModel
     @State private var showingAddFood = false
+    @State private var showingProfile = false
+    @State private var showingNotifications = false
 
     var body: some View {
         NavigationView {
@@ -28,21 +30,52 @@ struct ContentView: View {
             }
             .navigationTitle("Food Tracker")
             .toolbar {
+                // Venstre knapp – varsler
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showingNotifications = true
+                    } label: {
+                        Image(systemName: "bell")
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddFood = true }) {
+                    Button {
+                        showingAddFood = true
+                    } label: {
                         Image(systemName: "plus")
                     }
                 }
+                
+                // Høyre knapp – profil
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingProfile = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                    }
+                }
             }
+            // Sheets for adding food item
             .sheet(isPresented: $showingAddFood) {
                 AddFoodView(viewModel: viewModel)
+            }
+            
+            // Sheets for profil og varsler
+            .sheet(isPresented: $showingProfile) {
+                // ProfileView()
+            }
+            .sheet(isPresented: $showingNotifications) {
+                // NotificationsView()
             }
         }
     }
 }
 
-
-
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .environmentObject(FoodViewModel())
+    }
 }
+
