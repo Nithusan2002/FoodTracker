@@ -8,28 +8,30 @@
 import SwiftUI
 
 struct AddFoodView: View {
-    @Environment(\.dismiss) var dismiss
+    @ObservedObject var viewModel: FoodViewModel
+    @Environment(\.dismiss) private var dismiss
+
     @State private var name = ""
     @State private var calories = ""
-    
-    var onSave: (String, Int) -> Void
-    
+
     var body: some View {
-        NavigationStack {
+        NavigationView {
             Form {
-                TextField("Navn på matvare", text: $name)
-                TextField("Kalorier", text: $calories)
-                    .keyboardType(.numberPad)
+                Section(header: Text("Food Details")) {
+                    TextField("Name", text: $name)
+                    TextField("Calories", text: $calories)
+                        .keyboardType(.numberPad)
+                }
             }
-            .navigationTitle("Legg til mat")
+            .navigationTitle("Add Food")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Avbryt") { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Lagre") {
-                        if let cal = Int(calories) {
-                            onSave(name, cal)
+                    Button("Save") {
+                        if let cal = Int(calories), !name.isEmpty {
+                            viewModel.addFood(name: name, calories: cal)
                             dismiss()
                         }
                     }

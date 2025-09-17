@@ -8,44 +8,89 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var vm = FoodViewModel()
+    @EnvironmentObject var viewModel: FoodViewModel
     @State private var showingAddFood = false
-    
-    let foods = [
-            FoodItem(name: "Eple", calories: 52),
-            FoodItem(name: "Banan", calories: 89),
-            FoodItem(name: "Kyllingfilet", calories: 165)
-        ]
-        
-        var body: some View {
-            NavigationStack {
-                List(vm.foods) { food in
-                    HStack {
-                        Text(food.name)
-                        Spacer()
-                        Text("\(food.calories) kcal")
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .navigationTitle("Dagens mat")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingAddFood = true
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
+    @State private var showingProfile = false
+    @State private var showingNotifications = false
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                List {
+                    if viewModel.foods.isEmpty {
+                        VStack(spacing: 8) {
+                            Image(systemName: "fork.knife")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            Text("Ingen matvarer registrert ennå")
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    } else {
+                        ForEach(viewModel.foods) { item in
+                            HStack {
+                                Text(item.name ?? "")
+                                Spacer()
+                                Text("\(item.calories) kcal")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .onDelete { indexSet in
+                            indexSet.map { viewModel.foods[$0] }.forEach(viewModel.deleteFood)
                         }
                     }
                 }
-                .sheet(isPresented: $showingAddFood) {
-                    AddFoodView { name, calories in
-                        vm.addFood(name: name, calories: calories)
+                .listStyle(.insetGrouped)
+                .navigationTitle("Food Tracker")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button { showingNotifications = true } label: {
+                            Image(systemName: "bell")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button { showingProfile = true } label: {
+                            Image(systemName: "person.crop.circle")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingProfile) {
+                    // ProfileView()
+                }
+                .sheet(isPresented: $showingNotifications) {
+                    // NotificationsView()
+                }
+
+                // Flytende pluss-knapp
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button {
+                            showingAddFood = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.accentColor)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        }
+                        .padding()
+                        .sheet(isPresented: $showingAddFood) {
+                            AddFoodView(viewModel: viewModel)
+                        }
                     }
                 }
             }
         }
+    }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(FoodViewModel())
 }
+
