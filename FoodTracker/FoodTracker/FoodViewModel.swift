@@ -34,7 +34,7 @@ class FoodViewModel: ObservableObject {
         let calendar = Calendar.current
         return foods.filter { item in
             if let createdAt = item.createdAt {
-             j   return calendar.isDate(createdAt, inSameDayAs: date)
+            return calendar.isDate(createdAt, inSameDayAs: date)
             }
             return false
         }
