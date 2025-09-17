@@ -30,6 +30,16 @@ class FoodViewModel: ObservableObject {
         }
     }
     
+    func foods(for date: Date) -> [FoodItem] {
+        let calendar = Calendar.current
+        return foods.filter { item in
+            if let createdAt = item.createdAt {
+             j   return calendar.isDate(createdAt, inSameDayAs: date)
+            }
+            return false
+        }
+    }
+    
     func addFood(name: String, calories: Int) {
         let newFood = FoodItem(context: viewContext)
         newFood.id = UUID()

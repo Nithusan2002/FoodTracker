@@ -15,67 +15,82 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(viewModel.foods) { item in
+            ZStack {
+                List {
+                    if viewModel.foods.isEmpty {
+                        VStack(spacing: 8) {
+                            Image(systemName: "fork.knife")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            Text("Ingen matvarer registrert ennå")
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    } else {
+                        ForEach(viewModel.foods) { item in
+                            HStack {
+                                Text(item.name ?? "")
+                                Spacer()
+                                Text("\(item.calories) kcal")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .onDelete { indexSet in
+                            indexSet.map { viewModel.foods[$0] }.forEach(viewModel.deleteFood)
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .navigationTitle("Food Tracker")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button { showingNotifications = true } label: {
+                            Image(systemName: "bell")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button { showingProfile = true } label: {
+                            Image(systemName: "person.crop.circle")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingProfile) {
+                    // ProfileView()
+                }
+                .sheet(isPresented: $showingNotifications) {
+                    // NotificationsView()
+                }
+
+                // Flytende pluss-knapp
+                VStack {
+                    Spacer()
                     HStack {
-                        Text(item.name ?? "")
                         Spacer()
-                        Text("\(item.calories) kcal")
-                            .foregroundColor(.secondary)
+                        Button {
+                            showingAddFood = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.accentColor)
+                                .clipShape(Circle())
+                                .shadow(radius: 4)
+                        }
+                        .padding()
+                        .sheet(isPresented: $showingAddFood) {
+                            AddFoodView(viewModel: viewModel)
+                        }
                     }
                 }
-                .onDelete { indexSet in
-                    indexSet.map { viewModel.foods[$0] }.forEach(viewModel.deleteFood)
-                }
-            }
-            .navigationTitle("Food Tracker")
-            .toolbar {
-                // Venstre knapp – varsler
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingNotifications = true
-                    } label: {
-                        Image(systemName: "bell")
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddFood = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-                
-                // Høyre knapp – profil
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingProfile = true
-                    } label: {
-                        Image(systemName: "person.crop.circle")
-                    }
-                }
-            }
-            // Sheets for adding food item
-            .sheet(isPresented: $showingAddFood) {
-                AddFoodView(viewModel: viewModel)
-            }
-            
-            // Sheets for profil og varsler
-            .sheet(isPresented: $showingProfile) {
-                // ProfileView()
-            }
-            .sheet(isPresented: $showingNotifications) {
-                // NotificationsView()
             }
         }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .environmentObject(FoodViewModel())
-    }
+#Preview {
+    ContentView()
+        .environmentObject(FoodViewModel())
 }
 
