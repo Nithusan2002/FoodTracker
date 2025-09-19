@@ -8,29 +8,43 @@
 import SwiftUI
 
 struct MainView: View {
+    @Environment(\.managedObjectContext) private var moc
     @StateObject private var viewModel = FoodViewModel()
 
     var body: some View {
         TabView {
-            ContentView()
-                .environmentObject(viewModel)
+            HomeView(viewModel: viewModel)
+                .environment(\.managedObjectContext, moc)
                 .tabItem {
-                    Label("Foods", systemImage: "list.bullet")
+                    Label("Hjem", systemImage: "house.fill")
                 }
-            
-            StatsView()
+
+            /*
+            HistoryView(viewModel: viewModel)
+                .environment(\.managedObjectContext, moc)
+                .tabItem {
+                    Label("Historikk", systemImage: "clock.fill")
+                }
+            */
+            FoodLogView()
                 .environmentObject(viewModel)
                 .tabItem {
-                    Label("Stats", systemImage: "chart.bar")
+                    Label("Matlogg", systemImage: "list.bullet")
+                }
+
+            StatsView()
+                .tabItem {
+                    Label("Statistikk", systemImage: "chart.bar.fill")
                 }
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label("Innstillinger", systemImage: "gearshape.fill")
                 }
         }
     }
 }
+
 
 #Preview {
     MainView()
