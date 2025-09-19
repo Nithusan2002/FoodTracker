@@ -40,12 +40,13 @@ class FoodViewModel: ObservableObject {
         }
     }
     
-    func addFood(name: String, calories: Int) {
+    func addFood(name: String, calories: Int, barcode: String? = nil) {
         let newFood = FoodItem(context: viewContext)
         newFood.id = UUID()
         newFood.name = name
         newFood.calories = Int32(calories)
-        newFood.createdAt = Date() // NY LINJE
+        newFood.createdAt = Date()
+        newFood.barcode = barcode // lagre strekkoden hvis vi har den
         
         saveContext()
         fetchFoods()
