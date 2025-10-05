@@ -1,10 +1,3 @@
-//
-//  StatsView.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 17/09/2025.
-//
-
 import SwiftUI
 import CoreData
 import Charts

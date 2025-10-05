@@ -1,10 +1,3 @@
-//
-//  MainView.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 17/09/2025.
-//
-
 import SwiftUI
 
 struct MainView: View {

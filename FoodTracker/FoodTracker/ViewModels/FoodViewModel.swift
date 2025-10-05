@@ -1,10 +1,3 @@
-//
-//  FoodViewModel.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 16/09/2025.
-//
-
 import SwiftUI
 import CoreData
 
