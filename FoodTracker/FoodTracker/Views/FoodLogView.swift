@@ -77,7 +77,7 @@ struct FoodLogView: View {
             .navigationTitle("Matlogg")
             .sheet(isPresented: $showingAddFood) {
                 if let mealType = selectedMealTypeForAdd {
-                    AddFoodView(viewModel: viewModel, preselectedMealType: mealType)
+                    AddFoodView(preselectedMealType: mealType)
                 }
             }
         }

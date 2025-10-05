@@ -1,77 +1,151 @@
 import SwiftUI
 
 struct HomeView: View {
-    @ObservedObject var viewModel: FoodViewModel
+    @EnvironmentObject var viewModel: FoodViewModel
+    @AppStorage("dailyCalorieGoal") private var dailyCalorieGoal: Double = 2200
+    @State private var showAddFood = false
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+            ScrollView(showsIndicators: false) {
+                let todayFoods = viewModel.foods(for: Date())
+                let totalCalories = todayFoods.reduce(0.0) { $0 + Double($1.calories) }
+                let totalCarbs = todayFoods.reduce(0.0) { $0 + $1.carbs }
+                let totalProtein = todayFoods.reduce(0.0) { $0 + $1.protein }
+                let totalFat = todayFoods.reduce(0.0) { $0 + $1.fat }
+                let progress = totalCalories / dailyCalorieGoal
 
-                    // Dato
-                    Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide).year()).capitalized)                        .font(.title2)
-                        .bold()
-
-                    // Kalorier spist hittil
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Kalorier spist i dag")
-                            .font(.headline)
-                        Text("\(totalCaloriesToday(), specifier: "%.0f") kcal")
-                            .font(.largeTitle)
-                            .bold()
+                VStack(alignment: .leading, spacing: 24) {
+                    
+                    // 🗓️ Dato
+                    Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide).year()).capitalized)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                    
+                    // 🔥 Kalorier – hovedkort
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(LinearGradient(colors: [Color("AppGreen"), Color("AppGreen").opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .shadow(radius: 3)
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Dagens inntak")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.9))
+                            Text("\(Int(totalCalories)) kcal")
+                                .font(.system(size: 44, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            ProgressView(value: totalCalories, total: dailyCalorieGoal)
+                                .tint(.white)
+                                .animation(.easeInOut(duration: 0.4), value: totalCalories)
+                            Text("\(Int(totalCalories)) / \(Int(dailyCalorieGoal)) kcal")
+                                .font(.footnote)
+                                .foregroundColor(.white.opacity(0.9))
+                            Text(motivationText(progress: progress))
+                                .font(.subheadline)
+                                .bold()
+                                .foregroundColor(.white)
+                                .padding(.top, 4)
+                        }
+                        .padding()
                     }
-
-                    // Makrofordeling
-                    VStack(alignment: .leading, spacing: 8) {
+                    .frame(maxWidth: .infinity, minHeight: 150)
+                    
+                    // 📊 Makrofordeling – tre kort
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("Makrofordeling")
                             .font(.headline)
-
-                        HStack {
-                            macroStat(title: "Karbohydrater", value: totalCarbsToday(), unit: "g")
-                            Spacer()
-                            macroStat(title: "Proteiner", value: totalProteinToday(), unit: "g")
-                            Spacer()
-                            macroStat(title: "Fett", value: totalFatToday(), unit: "g")
+                        
+                        HStack(spacing: 12) {
+                            macroCard(title: "Karbohydrater", value: totalCarbs, color: .orange)
+                            macroCard(title: "Proteiner", value: totalProtein, color: .blue)
+                            macroCard(title: "Fett", value: totalFat, color: .pink)
+                        }
+                    }
+                    
+                    // 🍽️ Matvarer logget
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Matvarer logget i dag")
+                            .font(.headline)
+                        
+                        if todayFoods.isEmpty {
+                            VStack(spacing: 8) {
+                                Image(systemName: "leaf.fill")
+                                    .font(.largeTitle)
+                                    .foregroundColor(Color("AppGreen"))
+                                Text("Ingen matvarer logget ennå 🌿")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Button {
+                                    showAddFood = true
+                                } label: {
+                                    Text("Legg til første måltid")
+                                        .font(.callout.bold())
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 8)
+                                        .background(Color("AppGreen").opacity(0.15))
+                                        .cornerRadius(12)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
+                        } else {
+                            ForEach(todayFoods) { food in
+                                HStack {
+                                    Text(food.name ?? "Ukjent")
+                                    Spacer()
+                                    Text("\(Int(food.calories)) kcal")
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 4)
+                            }
                         }
                     }
                 }
                 .padding()
             }
             .navigationTitle("Hjem")
+            .background(Color(.systemGroupedBackground))
+            .sheet(isPresented: $showAddFood) {
+                AddFoodView()
+                    .environmentObject(viewModel)
+            }
         }
     }
 
-    // MARK: - Makrostat komponent
-    private func macroStat(title: String, value: Double, unit: String) -> some View {
-        VStack {
-            Text("\(value, specifier: "%.0f") \(unit)")
-                .font(.title3)
-                .bold()
+    // MARK: - Kort for makroer
+    private func macroCard(title: String, value: Double, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text("\(Int(value)) g")
+                .font(.headline)
+                .foregroundColor(color)
             Text(title)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 
-    // MARK: - Beregninger
-    private func totalCaloriesToday() -> Double {
-        viewModel.foods(for: Date())
-            .reduce(0) { $0 + Double($1.calories) }
+    private func motivationText(progress: Double) -> String {
+        switch progress {
+        case 0..<0.5:
+            return "God start! Fortsett å logge 💪"
+        case 0.5..<0.9:
+            return "Bra jobba! Du nærmer deg målet 🥗"
+        case 0.9..<1.1:
+            return "Fantastisk! Du nådde målet 🎯"
+        default:
+            return "Wow! Du har overgått målet ditt 🔥"
+        }
     }
+}
 
-    private func totalCarbsToday() -> Double {
-        viewModel.foods(for: Date())
-            .reduce(0.0) { $0 + ($1.carbs) }
-    }
-
-    private func totalProteinToday() -> Double {
-        viewModel.foods(for: Date())
-            .reduce(0.0) { $0 + ($1.protein) }
-    }
-
-    private func totalFatToday() -> Double {
-        viewModel.foods(for: Date())
-            .reduce(0.0) { $0 + ($1.fat) }
-    }
-
+#Preview {
+    HomeView()
+        .environmentObject(FoodViewModel())
 }

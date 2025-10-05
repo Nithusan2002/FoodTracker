@@ -74,11 +74,21 @@ class FoodViewModel: ObservableObject {
         }
         if changed { saveContext() }
     }
+    
+    func totalCalories(for date: Date) -> Int {
+        let calendar = Calendar.current
+        return foods
+            .filter { food in
+                guard let createdAt = food.createdAt else { return false }
+                return calendar.isDate(createdAt, inSameDayAs: date)
+            }
+            .reduce(0) { sum, food in
+                sum + Int(food.calories)
+            }
+    }
 }
 
 #Preview {
-    FoodLogView()
+    HomeView()
         .environmentObject(FoodViewModel())
 }
-
-

@@ -7,7 +7,7 @@ enum PortionMode: String, CaseIterable {
 }
 
 struct AddFoodView: View {
-    @ObservedObject var viewModel: FoodViewModel
+    @EnvironmentObject var viewModel: FoodViewModel
     @Environment(\.dismiss) private var dismiss
 
     // Felter
@@ -44,9 +44,8 @@ struct AddFoodView: View {
     @State private var proteinPerPortion: Double = 0
     @State private var fatPerPortion: Double = 0
 
-    init(viewModel: FoodViewModel, preselectedMealType: String = "frokost") {
-        self.viewModel = viewModel
-        _selectedMealType = State(initialValue: preselectedMealType)
+    init(preselectedMealType: String = "frokost") {
+            _selectedMealType = State(initialValue: preselectedMealType)
     }
 
     var body: some View {

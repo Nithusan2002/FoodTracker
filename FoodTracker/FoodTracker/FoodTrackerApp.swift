@@ -2,6 +2,9 @@ import SwiftUI
 
 @main
 struct FoodTrackerApp: App {
+    
+    @StateObject private var viewModel = FoodViewModel()
+
     init() {
         // Tving klassisk fullbredde-stil på TabView/UITabBar
         let appearance = UITabBarAppearance()

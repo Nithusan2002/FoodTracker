@@ -6,19 +6,13 @@ struct MainView: View {
 
     var body: some View {
         TabView {
-            HomeView(viewModel: viewModel)
+            HomeView()
+                .environmentObject(viewModel) // 👈 Legg viewModel i miljøet
                 .environment(\.managedObjectContext, moc)
                 .tabItem {
                     Label("Hjem", systemImage: "house.fill")
                 }
 
-            /*
-            HistoryView(viewModel: viewModel)
-                .environment(\.managedObjectContext, moc)
-                .tabItem {
-                    Label("Historikk", systemImage: "clock.fill")
-                }
-            */
             FoodLogView()
                 .environmentObject(viewModel)
                 .tabItem {
@@ -26,11 +20,13 @@ struct MainView: View {
                 }
 
             StatsView()
+                .environmentObject(viewModel)
                 .tabItem {
                     Label("Statistikk", systemImage: "chart.bar.fill")
                 }
 
             SettingsView()
+                .environmentObject(viewModel)
                 .tabItem {
                     Label("Innstillinger", systemImage: "gearshape.fill")
                 }
@@ -38,9 +34,7 @@ struct MainView: View {
     }
 }
 
-
 #Preview {
     MainView()
         .environmentObject(FoodViewModel())
 }
-
