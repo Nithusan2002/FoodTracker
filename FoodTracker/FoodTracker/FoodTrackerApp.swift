@@ -1,14 +1,10 @@
-//
-//  FoodTrackerApp.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 15/09/2025.
-//
-
 import SwiftUI
 
 @main
 struct FoodTrackerApp: App {
+    
+    @StateObject private var viewModel = FoodViewModel()
+
     init() {
         // Tving klassisk fullbredde-stil på TabView/UITabBar
         let appearance = UITabBarAppearance()

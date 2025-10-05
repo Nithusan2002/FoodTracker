@@ -1,10 +1,3 @@
-//
-//  FoodViewModel.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 16/09/2025.
-//
-
 import SwiftUI
 import CoreData
 
@@ -40,16 +33,23 @@ class FoodViewModel: ObservableObject {
         }
     }
     
-    func addFood(name: String, calories: Int, barcode: String? = nil) {
-        let newFood = FoodItem(context: viewContext)
-        newFood.id = UUID()
-        newFood.name = name
-        newFood.calories = Int32(calories)
-        newFood.createdAt = Date()
-        newFood.barcode = barcode // lagre strekkoden hvis vi har den
-        
-        saveContext()
-        fetchFoods()
+    func addFood(name: String, calories: Int, carbs: Double?, protein: Double?, fat: Double?, barcode: String?, mealType: String) {
+        let newItem = FoodItem(context: viewContext)
+        newItem.name = name
+        newItem.calories = Int32(calories)
+        newItem.carbs = carbs ?? 0
+        newItem.protein = protein ?? 0
+        newItem.fat = fat ?? 0
+        newItem.barcode = barcode
+        newItem.mealType = mealType
+        newItem.createdAt = Date()
+
+        do {
+            try viewContext.save()
+            fetchFoods()
+        } catch {
+            print("Kunne ikke lagre matvaren: \(error.localizedDescription)")
+        }
     }
     
     func deleteFood(_ food: FoodItem) {
@@ -74,11 +74,21 @@ class FoodViewModel: ObservableObject {
         }
         if changed { saveContext() }
     }
+    
+    func totalCalories(for date: Date) -> Int {
+        let calendar = Calendar.current
+        return foods
+            .filter { food in
+                guard let createdAt = food.createdAt else { return false }
+                return calendar.isDate(createdAt, inSameDayAs: date)
+            }
+            .reduce(0) { sum, food in
+                sum + Int(food.calories)
+            }
+    }
 }
 
 #Preview {
-    ContentView()
+    HomeView()
         .environmentObject(FoodViewModel())
 }
-
-

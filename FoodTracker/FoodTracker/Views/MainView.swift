@@ -1,32 +1,34 @@
-//
-//  MainView.swift
-//  FoodTracker
-//
-//  Created by Nithusan Krishnasamymudali on 17/09/2025.
-//
-
 import SwiftUI
 
 struct MainView: View {
+    @Environment(\.managedObjectContext) private var moc
     @StateObject private var viewModel = FoodViewModel()
 
     var body: some View {
         TabView {
-            ContentView()
+            HomeView()
+                .environmentObject(viewModel) // 👈 Legg viewModel i miljøet
+                .environment(\.managedObjectContext, moc)
+                .tabItem {
+                    Label("Hjem", systemImage: "house.fill")
+                }
+
+            FoodLogView()
                 .environmentObject(viewModel)
                 .tabItem {
-                    Label("Foods", systemImage: "list.bullet")
+                    Label("Matlogg", systemImage: "list.bullet")
                 }
-            
+
             StatsView()
                 .environmentObject(viewModel)
                 .tabItem {
-                    Label("Stats", systemImage: "chart.bar")
+                    Label("Statistikk", systemImage: "chart.bar.fill")
                 }
 
             SettingsView()
+                .environmentObject(viewModel)
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label("Innstillinger", systemImage: "gearshape.fill")
                 }
         }
     }
@@ -36,4 +38,3 @@ struct MainView: View {
     MainView()
         .environmentObject(FoodViewModel())
 }
-
